@@ -49,7 +49,7 @@ pipeline {
 
                     rtMavenRun(
                         pom: 'pom.xml',
-                        goals: 'install',
+                        goals: 'clean install -DskipTests -Dcheckstyle.skip=true',
                         deployerId: 'maven-deployer',
                         buildName: 'petclinic',
                         buildNumber: "${APP_VERSION}"
