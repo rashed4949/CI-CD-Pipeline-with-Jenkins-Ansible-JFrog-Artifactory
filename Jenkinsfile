@@ -66,15 +66,20 @@ pipeline {
 
         stage('Deploy via Ansible') {
             steps {
-                sh """
-                    ansible-playbook \
-                    -i /var/lib/jenkins/ansible/inventory.ini \
-                    /var/lib/jenkins/ansible/deploy-petclinic.yml \
-                    --extra-vars "app_version=${APP_VERSION} artifactory_password=${ARTIF_CREDS_PSW}"
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'artifactory-creds',
+                    usernameVariable: 'ART_USER',
+                    passwordVariable: 'ART_PASS'
+                )]) {
+                    sh '''
+                        ansible-playbook \
+                        -i /var/lib/jenkins/ansible/inventory.ini \
+                        /var/lib/jenkins/ansible/deploy-petclinic.yml \
+                        --extra-vars "app_version=${APP_VERSION} artifactory_user=$ART_USER artifactory_password=$ART_PASS"
+                    '''
+                }
             }
         }
-    }
 
     post {
         success {
