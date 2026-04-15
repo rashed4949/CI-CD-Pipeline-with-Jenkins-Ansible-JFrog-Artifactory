@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        ARTIFACTORY_URL  = 'https://164.90.215.116:8082/artifactory'
+        ARTIFACTORY_URL  = 'http://164.90.215.116:8082'
         ARTIFACTORY_REPO = 'petclinic-libs-release'
         APP_VERSION      = "${env.BUILD_NUMBER}"
         ARTIF_CREDS      = credentials('artifactory-creds')
@@ -78,7 +78,7 @@ pipeline {
 
     post {
         success {
-            echo "PetClinic deployed successfully at https://139.59.157.224:80"
+            echo "PetClinic deployed successfully at http://139.59.157.224:80"
         }
 
         failure {
