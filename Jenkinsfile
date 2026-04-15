@@ -2,18 +2,19 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'         // matches name in Global Tool Config
-        jdk   'JDK17'
+        maven 'Maven'
+        jdk 'JDK17'
     }
 
     environment {
-        ARTIFACTORY_URL      = 'http://164.90.215.116:8082/artifactory'
-        ARTIFACTORY_REPO     = 'petclinic-libs-release'
-        ARTIF_CREDS          = credentials('artifactory-creds')
-        APP_VERSION          = "${env.BUILD_NUMBER}"
+        ARTIFACTORY_URL  = 'http://164.90.215.116:8082/artifactory'
+        ARTIFACTORY_REPO = 'petclinic-libs-release'
+        APP_VERSION      = "${env.BUILD_NUMBER}"
+        ARTIF_CREDS      = credentials('artifactory-creds')
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -24,36 +25,42 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-            mvn clean install -DskipTests -Dcheckstyle.skip=true
-                 '''
+                    mvn clean install -DskipTests -Dcheckstyle.skip=true
+                '''
             }
+
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                    junit allowEmptyResults: true,
+                          testResults: '**/target/surefire-reports/*.xml'
                 }
             }
         }
 
         stage('Upload to Artifactory') {
             steps {
-                rtMavenDeployer(
-                    id: 'maven-deployer',
-                    serverId: 'artifactory',            // matches Jenkins JFrog config ID
-                    releaseRepo: "${ARTIFACTORY_REPO}",
-                    snapshotRepo: "petclinic-libs-snapshot"
-                )
-                rtMavenRun(
-                    pom: 'pom.xml',
-                    goals: 'install',
-                    deployerId: 'maven-deployer',
-                    buildName: 'petclinic',
-                    buildNumber: "${APP_VERSION}"
-                )
-                rtPublishBuildInfo(
-                    serverId: 'artifactory',
-                    buildName: 'petclinic',
-                    buildNumber: "${APP_VERSION}"
-                )
+                script {
+                    rtMavenDeployer(
+                        id: 'maven-deployer',
+                        serverId: 'artifactory',
+                        releaseRepo: "${ARTIFACTORY_REPO}",
+                        snapshotRepo: "petclinic-libs-snapshot"
+                    )
+
+                    rtMavenRun(
+                        pom: 'pom.xml',
+                        goals: 'install',
+                        deployerId: 'maven-deployer',
+                        buildName: 'petclinic',
+                        buildNumber: "${APP_VERSION}"
+                    )
+
+                    rtPublishBuildInfo(
+                        serverId: 'artifactory',
+                        buildName: 'petclinic',
+                        buildNumber: "${APP_VERSION}"
+                    )
+                }
             }
         }
 
@@ -61,9 +68,9 @@ pipeline {
             steps {
                 sh """
                     ansible-playbook \
-                      -i /var/lib/jenkins/ansible/inventory.ini \
-                      /var/lib/jenkins/ansible/deploy-petclinic.yml \
-                      --extra-vars "app_version=3.3.0 artifactory_password=${ARTIF_CREDS_PSW}"
+                    -i /var/lib/jenkins/ansible/inventory.ini \
+                    /var/lib/jenkins/ansible/deploy-petclinic.yml \
+                    --extra-vars "app_version=${APP_VERSION} artifactory_password=${ARTIF_CREDS_PSW}"
                 """
             }
         }
@@ -73,6 +80,7 @@ pipeline {
         success {
             echo "PetClinic deployed successfully at http://139.59.157.224:80"
         }
+
         failure {
             echo "Pipeline failed — check logs above"
         }
