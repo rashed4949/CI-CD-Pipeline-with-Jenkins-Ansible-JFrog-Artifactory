@@ -86,14 +86,15 @@ pipeline {
                 }
             }
         }
+    }
 
     post {
         success {
-            echo "PetClinic deployed successfully at http://139.59.157.224"
+            echo "PetClinic deployed successfully 🚀"
         }
 
         failure {
-            echo "Pipeline failed — check logs above"
+            echo "Pipeline failed — check logs above ❌"
         }
     }
 }
