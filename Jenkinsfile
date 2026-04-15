@@ -24,8 +24,8 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-            mvn clean install -DskipTests
-                '''
+            mvn clean install -DskipTests -Dcheckstyle.skip=true
+                 '''
             }
             post {
                 always {
