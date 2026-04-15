@@ -82,7 +82,7 @@ pipeline {
         }
 
         failure {
-            echo "Pipeline failed — check logs above"
+            echo "Pipeline failed — check logs above rashed"
         }
     }
 }
