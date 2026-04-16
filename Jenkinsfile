@@ -11,7 +11,7 @@ pipeline {
     }
 
     environment {
-        ARTIFACTORY_URL  = 'http://164.90.157.224:8082/artifactory'
+        ARTIFACTORY_URL  = 'http://164.90.215.116:8082/artifactory'
         ARTIFACTORY_REPO = 'petclinic-libs-release'
         APP_VERSION      = "${BUILD_NUMBER}"
     }
